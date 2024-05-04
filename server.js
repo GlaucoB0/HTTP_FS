@@ -1,7 +1,5 @@
 import http from "node:http"
-import escreverDadosFuncionarios from "./escreverDadosFuncionarios.js"
-
-import lerDadosFuncionarios from "./lerDadosFuncionarios.js"
+import {escreverDadosFuncionarios, lerDadosFuncionarios} from "./funcionalidades.js"
 
 const PORT = 3333
 
@@ -126,7 +124,7 @@ const server = http.createServer((request, response) => {
 
         funcionarios.push(NovoEmpregado)
 
-        escreverDadosFuncionarios((err) => {
+        escreverDadosFuncionarios(funcionarios, (err) => {
           if (err) {
             response.writeHead(500, { "Content-Type": "application/json" })
             response.end(JSON.stringify({ message: "erro de servidor" }))
@@ -135,7 +133,7 @@ const server = http.createServer((request, response) => {
           response.writeHead(202, { "Content-Type": "application/json" })
           response.end(JSON.stringify(funcionarios))
 
-        }, funcionarios)
+        })
       })
     })
 
@@ -159,7 +157,7 @@ const server = http.createServer((request, response) => {
 
           funcionarios[index] = { ...funcionarios[index], ...infoEmpregado }
 
-          escreverDadosFuncionarios((err) => {
+          escreverDadosFuncionarios(funcionarios, (err) => {
             if (err) {
               response.writeHead(500, { "Content-Type": "application/json" })
               response.end(JSON.stringify({ message: "erro de servidor" }))
@@ -168,7 +166,7 @@ const server = http.createServer((request, response) => {
             response.writeHead(200, { "Content-Type": "application/json" })
             response.end(JSON.stringify(funcionarios[index]))
 
-          }, funcionarios)
+          })
         })
       } else {
         response.writeHead(404, { "Content-Type": "application/json" })
@@ -185,10 +183,14 @@ const server = http.createServer((request, response) => {
       const id = url.split("/")[2]
       const index = funcionarios.findIndex((empregado) => empregado.id == id)
 
-      if (index !== -1) {
+      if (index === -1) {
+        response.writeHead(404, { "Content-Type": "application/json" })
+        response.end(JSON.stringify({ message: "funcionario não encontrado" }))
+
+      } else {
         funcionarios.splice(index, 1)
 
-        escreverDadosFuncionarios((err) => {
+        escreverDadosFuncionarios(funcionarios, (err) => {
           if (err) {
             response.writeHead(500, { "Content-Type": "application/json" })
             response.end(JSON.stringify({ message: "erro de servidor" }))
@@ -197,11 +199,7 @@ const server = http.createServer((request, response) => {
           response.writeHead(200, { "Content-Type": "application/json" })
           response.end(JSON.stringify({ message: 'item Deletado' }))
 
-        }, funcionarios)
-
-      } else {
-        response.writeHead(404, { "Content-Type": "application/json" })
-        response.end(JSON.stringify({ message: "funcionario não encontrado" }))
+        })
       }
     })
 
